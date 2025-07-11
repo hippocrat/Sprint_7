@@ -39,14 +39,14 @@ public class CreateOrderTest {
     @DisplayName("Parameterized test: create order with different colors")
     public void createOrderWithColorsReturnsSuccess() {
 
-        OrderJson orderJson = new OrderJson("Naruto",
-                "Uchiha",
-                "Konoha, 142 apt.",
-                4,
+        OrderJson orderJson = new OrderJson("Eren",
+                "Yeger",
+                "Liberia, 3rd wall",
+                2,
                 "+7 800 355 35 35",
-                5,
-                "2020-06-06",
-                "Saske, come back to Konoha",
+                7,
+                "2024-07-07",
+                "Mikasa, may the force be with you",
                 colors
                 );
 
