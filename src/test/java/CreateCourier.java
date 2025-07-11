@@ -8,7 +8,7 @@ import org.junit.Test;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
-public class Courier {
+public class CreateCourier {
 
     @Before
     public void setUp() {
