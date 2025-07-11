@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import utils.OrderJson;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -21,13 +23,13 @@ public class CreateOrderTest {
     }
 
     @Parameterized.Parameters
-    public static Object[][] getColorData() {
-        return new Object[][] {
-                {"BLACK"},
-                {"GREY"},
-                {"BLACK", "GREY"},
-                {""}
-        };
+    public static Collection<Object[]> getColorData() {
+        return Arrays.asList(new Object[][] {
+                {Arrays.asList("BLACK")},
+                {Arrays.asList("GREY")},
+                {Arrays.asList("BLACK", "GREY")},
+                {Arrays.asList("")}
+        });
     }
 
     @Before
