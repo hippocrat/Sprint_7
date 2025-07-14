@@ -18,6 +18,7 @@ public class CreateCourierTest {
     @Before
     public void setUp() {
         RestAssured.baseURI = baseUri;
+        deleteCourierIfExists(courierLogin, courierPassword);
     }
 
     @Test
@@ -85,10 +86,10 @@ public class CreateCourierTest {
                 .statusCode(400);
     }
 
-    @After
-    public void tearDown() {
-        deleteCourierIfExists(courierLogin, courierPassword);
-    }
+//    @After
+//    public void tearDown() {
+//        deleteCourierIfExists(courierLogin, courierPassword);
+//    }
 
     // Вспомогательные методы со @Step
 
