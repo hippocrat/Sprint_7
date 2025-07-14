@@ -1,4 +1,5 @@
-import io.qameta.allure.junit4.DisplayName;
+import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.After;
@@ -6,171 +7,144 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 public class LoginCourierTest {
 
+    private final String baseUri = "https://qa-scooter.praktikum-services.ru";
+    private final String courierLogin = "belyilotos";
+    private final String courierPassword = "1234";
+
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
-        String json = "{\"login\": \"belyilotos\", \"password\": \"1234\", \"firstName\": \"belyi\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier");
+        RestAssured.baseURI = baseUri;
+        createCourier(courierLogin, courierPassword, "belyi");
     }
 
     @Test
-    @DisplayName("Login as courier returns 200")
+    @Description("Успешный логин курьера, код 200")
     public void loginAsCourierReturnsSuccess() {
-        String json = "{\"login\": \"belyilotos\", \"password\": \"1234\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
-                .statusCode(200);
+        Response response = loginCourier(courierLogin, courierPassword);
+        validateStatusCode(response, 200);
     }
 
     @Test
-    @DisplayName("Login with empty login returns 400")
+    @Description("Логин с пустым логином возвращает 400")
     public void loginAsCourierWithEmptyLoginReturnsError() {
-        String json = "{\"login\": \"\", \"password\": \"1234\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
-                .statusCode(400);
+        Response response = loginCourier("", courierPassword);
+        validateStatusCode(response, 400);
     }
 
     @Test
-    @DisplayName("Login with empty password returns 400")
+    @Description("Логин с пустым паролем возвращает 400")
     public void loginAsCourierWithEmptyPasswordReturnsError() {
-        String json = "{\"login\": \"belyilotos\", \"password\": \"\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
-                .statusCode(400);
+        Response response = loginCourier(courierLogin, "");
+        validateStatusCode(response, 400);
     }
 
     @Test
-    @DisplayName("Login as courier with wrong login returns 404")
+    @Description("Логин с несуществующим логином возвращает 404")
     public void loginAsCourierWithWrongLoginReturnsError() {
-        String json = "{\"login\": \"wrongLogin\", \"password\": \"1234\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
-                .statusCode(404);
+        Response response = loginCourier("wrongLogin", courierPassword);
+        validateStatusCode(response, 404);
     }
 
     @Test
-    @DisplayName("Login as courier with wrong password returns 404")
+    @Description("Логин с неверным паролем возвращает 404")
     public void loginAsCourierWithWrongPasswordReturnsError() {
-        String json = "{\"login\": \"belyilotos\", \"password\": \"wrongPassword\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
-                .statusCode(404);
+        Response response = loginCourier(courierLogin, "wrongPassword");
+        validateStatusCode(response, 404);
     }
 
     @Test
-    @DisplayName("Login without login returns 400")
+    @Description("Логин без логина возвращает 400")
     public void loginAsCourierWithoutLoginReturnsError() {
-        String json = "{\"password\": \"1234\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
-                .statusCode(400);
+        String json = "{\"password\": \"" + courierPassword + "\"}";
+        Response response = sendLoginRequest(json);
+        validateStatusCode(response, 400);
     }
 
     @Test
-    @DisplayName("Login without password returns 400")
+    @Description("Логин без пароля возвращает 400")
     public void loginAsCourierWithoutPasswordReturnsError() {
-        String json = "{\"login\": \"belyilotos\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
-                .statusCode(400);
+        String json = "{\"login\": \"" + courierLogin + "\"}";
+        Response response = sendLoginRequest(json);
+        validateStatusCode(response, 400);
     }
 
     @Test
-    @DisplayName("Login as courier which is not exist returns error text")
+    @Description("Логин несуществующего курьера возвращает текст ошибки")
     public void loginAsCourierNotExistReturnsErrorText() {
-        String json = "{\"login\": \"notExist\", \"password\": \"1234\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
+        Response response = loginCourier("notExist", courierPassword);
+        response.then()
                 .statusCode(404)
                 .assertThat()
-                .body("message",equalTo("Учетная запись не найдена"));
+                .body("message", equalTo("Учетная запись не найдена"));
     }
 
     @Test
-    @DisplayName("Login as courier returns id")
+    @Description("Успешный логин возвращает id")
     public void loginAsCourierReturnsId() {
-        String json = "{\"login\": \"belyilotos\", \"password\": \"1234\"}";
-
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
+        Response response = loginCourier(courierLogin, courierPassword);
+        response.then()
                 .statusCode(200)
                 .assertThat()
                 .body("id", notNullValue());
     }
 
     @After
-    @DisplayName("Delete created courier")
     public void tearDown() {
-        String json = "{\"login\": \"belyilotos\", \"password\": \"1234\"}";
+        deleteCourierIfExists(courierLogin, courierPassword);
+    }
 
-        Response response =
-                given()
-                        .baseUri("https://qa-scooter.praktikum-services.ru")
-                        .body(json)
-                        .when()
-                        .post("/api/v1/courier/login");
+    // Вспомогательные методы
 
-        int id = response.jsonPath().getInt("id");
+    @Step("Создание курьера с login={login}, password={password}, firstName={firstName}")
+    private void createCourier(String login, String password, String firstName) {
+        String json = String.format("{\"login\": \"%s\", \"password\": \"%s\", \"firstName\": \"%s\"}",
+                login, password, firstName);
 
         given()
-                .baseUri("https://qa-scooter.praktikum-services.ru")
+                .header("Content-type", "application/json")
+                .body(json)
                 .when()
-                .delete("/api/v1/courier/" + id);
+                .post("/api/v1/courier")
+                .then()
+                .statusCode(anyOf(is(201), is(409))); // 409 если курьер уже существует
+    }
 
+    @Step("Логин курьера с login={login}, password={password}")
+    private Response loginCourier(String login, String password) {
+        String json = String.format("{\"login\": \"%s\", \"password\": \"%s\"}", login, password);
+        return sendLoginRequest(json);
+    }
+
+    @Step("Отправка POST-запроса логина с телом: {json}")
+    private Response sendLoginRequest(String json) {
+        return given()
+                .header("Content-type", "application/json")
+                .body(json)
+                .when()
+                .post("/api/v1/courier/login");
+    }
+
+    @Step("Проверка, что статус-код ответа равен {expectedStatus}")
+    private void validateStatusCode(Response response, int expectedStatus) {
+        response.then().statusCode(expectedStatus);
+    }
+
+    @Step("Удаление курьера с login={login}")
+    private void deleteCourierIfExists(String login, String password) {
+        Response response = loginCourier(login, password);
+
+        if (response.statusCode() == 200 && response.jsonPath().get("id") != null) {
+            int id = response.jsonPath().getInt("id");
+
+            given()
+                    .when()
+                    .delete("/api/v1/courier/" + id)
+                    .then()
+                    .statusCode(200);
+        }
     }
 }

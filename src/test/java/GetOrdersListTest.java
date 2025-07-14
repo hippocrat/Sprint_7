@@ -1,5 +1,7 @@
-import io.qameta.allure.junit4.DisplayName;
+import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,13 +16,22 @@ public class GetOrdersListTest {
     }
 
     @Test
-    @DisplayName("Order list request returns list of orders")
+    @Description("Запрос списка заказов. Проверка, что возвращается непустой список заказов")
     public void orderListRequestReturnsListOfOrders() {
+        Response response = getOrdersList();
+        validateOrdersList(response);
+    }
 
-        given()
+    @Step("Отправка GET-запроса на получение списка заказов")
+    private Response getOrdersList() {
+        return given()
                 .when()
-                .get("/api/v1/orders")
-                .then()
+                .get("/api/v1/orders");
+    }
+
+    @Step("Проверка, что в ответе код 200 и непустой список заказов")
+    private void validateOrdersList(Response response) {
+        response.then()
                 .statusCode(200)
                 .body("orders", notNullValue())
                 .body("orders", is(not(empty())));

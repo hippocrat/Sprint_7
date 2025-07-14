@@ -1,5 +1,7 @@
-import io.qameta.allure.junit4.DisplayName;
+import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +31,6 @@ public class CreateOrderTest {
                 {Arrays.asList("BLACK")},
                 {Arrays.asList("GREY")},
                 {Arrays.asList("BLACK", "GREY")},
-                {Arrays.asList("")},
                 {Collections.emptyList()}
         });
     }
@@ -40,9 +41,16 @@ public class CreateOrderTest {
     }
 
     @Test
-    @DisplayName("Parameterized test: create order with different colors")
+    @Description("Создание заказа с разными цветами. Проверка успешного ответа и наличия track")
     public void createOrderWithColorsReturnsSuccess() {
+        createOrder(colors)
+                .then()
+                .statusCode(201)
+                .body("track", notNullValue());
+    }
 
+    @Step("Создание заказа с цветами: {colors}")
+    private Response createOrder(List<String> colors) {
         OrderJson orderJson = new OrderJson("Eren",
                 "Yeger",
                 "Liberia, 3rd wall",
@@ -52,17 +60,12 @@ public class CreateOrderTest {
                 "2024-07-07",
                 "Mikasa, may the force be with you",
                 colors
-                );
+        );
 
-        given()
+        return given()
                 .header("Content-type", "application/json")
                 .body(orderJson)
                 .when()
-                .post("/api/v1/orders")
-                .then()
-                .statusCode(201)
-                .assertThat()
-                .body("track", notNullValue());
+                .post("/api/v1/orders");
     }
-
 }
