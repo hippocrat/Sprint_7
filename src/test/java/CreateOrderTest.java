@@ -8,6 +8,7 @@ import utils.OrderJson;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -28,7 +29,8 @@ public class CreateOrderTest {
                 {Arrays.asList("BLACK")},
                 {Arrays.asList("GREY")},
                 {Arrays.asList("BLACK", "GREY")},
-                {Arrays.asList("")}
+                {Arrays.asList("")},
+                {Collections.emptyList()}
         });
     }
 
